@@ -1,20 +1,27 @@
 package com.mimul.ratelimit;
 
+import java.util.function.LongSupplier;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class LeakyBucket extends RateLimiter {
+  private final LongSupplier clock;
   private final long capacity;
   private long used;
   private final long leakInterval;
   private long lastLeakTime;
 
   protected LeakyBucket(int maxRequestPerSec) {
+    this(maxRequestPerSec, System::currentTimeMillis);
+  }
+
+  LeakyBucket(int maxRequestPerSec, LongSupplier clock) {
     super(maxRequestPerSec);
+    this.clock = clock;
     this.capacity = maxRequestPerSec;
     this.used = 0;
     this.leakInterval = 1000 / maxRequestPerSec;
-    this.lastLeakTime = System.currentTimeMillis();
+    this.lastLeakTime = clock.getAsLong();
   }
 
   @Override
@@ -29,7 +36,7 @@ public class LeakyBucket extends RateLimiter {
     }
   }
   private void leak() {
-    final long now = System.currentTimeMillis();
+    final long now = clock.getAsLong();
     if (now > this.lastLeakTime) {
       long millisSinceLastLeak = now - this.lastLeakTime;
       long leaks = millisSinceLastLeak / this.leakInterval;

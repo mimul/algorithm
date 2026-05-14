@@ -1,7 +1,14 @@
 {
   "permissions": {
     "allow": [
-      "Bash(gh api *)"
+      "Bash(gh api *)",
+      "Bash(brew list *)",
+      "Bash(mvn test *)",
+      "Bash(java -version)",
+      "Bash(mvn -version)",
+      "Bash(mvn verify *)",
+      "Bash(awk -F, ' *)",
+      "Bash(sort -t= -k2 -n)"
     ]
   }
 }

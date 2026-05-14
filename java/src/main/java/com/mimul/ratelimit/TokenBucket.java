@@ -1,15 +1,22 @@
 package com.mimul.ratelimit;
 
+import java.util.function.LongSupplier;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class TokenBucket extends RateLimiter {
+  private final LongSupplier clockMillis;
   private int tokens;
   private int capacity;
   private long lastRefillTime;
 
   public TokenBucket(int maxRequestPerSec) {
+    this(maxRequestPerSec, System::currentTimeMillis);
+  }
+
+  TokenBucket(int maxRequestPerSec, LongSupplier clockMillis) {
     super(maxRequestPerSec);
+    this.clockMillis = clockMillis;
     this.tokens = maxRequestPerSec;
     this.capacity = maxRequestPerSec;
     this.lastRefillTime = scaledTime();
@@ -38,6 +45,6 @@ public class TokenBucket extends RateLimiter {
   }
 
   private long scaledTime() {
-    return System.currentTimeMillis() / 1000;
+    return clockMillis.getAsLong() / 1000;
   }
 }
