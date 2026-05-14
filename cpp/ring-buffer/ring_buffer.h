@@ -8,16 +8,6 @@
 #include <stdexcept>
 #include <vector>
 
-// Lock-free Single-Producer Single-Consumer (SPSC) ring buffer.
-//
-// Invariants:
-//   - size must be a power of 2 (index masking via `& (size - 1)`)
-//   - write_idx >= read_idx (monotonically increasing, never overflow in practice)
-//   - Full condition:  write_idx - read_idx == size
-//   - Empty condition: write_idx == read_idx
-//
-// Time complexity: O(1) amortized per enqueue/dequeue
-// Trade-off: SPSC only; MPMC requires additional synchronization
 class RingBuffer {
  public:
   explicit RingBuffer(size_t size) : buffer_(size) {
