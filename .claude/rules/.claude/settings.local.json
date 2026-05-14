@@ -8,7 +8,10 @@
       "Bash(mvn -version)",
       "Bash(mvn verify *)",
       "Bash(awk -F, ' *)",
-      "Bash(sort -t= -k2 -n)"
+      "Bash(sort -t= -k2 -n)",
+      "Bash(make clean *)",
+      "Bash(make)",
+      "Bash(make test *)"
     ]
   }
 }

@@ -1,61 +1,18 @@
-#include <atomic>
+#include "ring_buffer.h"
+
 #include <chrono>
-#include <cstddef>
 #include <cstdint>
-#include <iomanip>
 #include <iostream>
-#include <mutex>
-#include <queue>
 #include <thread>
-#include <vector>
 
-class RingBuffer {
-public:
-  explicit RingBuffer(size_t size) : buffer_(size) {}
+constexpr uint64_t kBmtCount = 500000;
 
-  // Returns true on success. Fails if the buffer is full.
-  bool enqueue(int item) {
-    uint64_t write_idx = write_idx_.load(std::memory_order_relaxed);
-    if (write_idx - cached_read_idx_ == buffer_.size()) {
-      cached_read_idx_ = read_idx_.load(std::memory_order_acquire);
-      if (write_idx - cached_read_idx_ == buffer_.size()) {
-        return false;
-      }
-    }
-    buffer_[write_idx & (buffer_.size() - 1)] = item;
-    write_idx_.store(write_idx + 1, std::memory_order_release);
-    return true;
-  }
-
-  // Returns true on success. Fails if the buffer is empty.
-  bool dequeue(int *dest) {
-    uint64_t read_idx = read_idx_.load(std::memory_order_relaxed);
-    if (cached_write_idx_ == read_idx) {
-      cached_write_idx_ = write_idx_.load(std::memory_order_acquire);
-      if (cached_write_idx_ == read_idx) {
-        return false;
-      }
-    }
-    *dest = buffer_[read_idx & (buffer_.size() - 1)];
-    read_idx_.store(read_idx + 1, std::memory_order_release);
-    return true;
-  }
-
-private:
-  std::vector<int> buffer_;
-  alignas(64) std::atomic<uint64_t> read_idx_{0};
-  alignas(64) uint64_t cached_read_idx_{0};
-  alignas(64) std::atomic<uint64_t> write_idx_{0};
-  alignas(64) uint64_t cached_write_idx_{0};
-};
-
-constexpr uint64_t bmtCount = 500000;
-
-template <typename RingBufferType> double benchmark(RingBufferType &rb) {
+template <typename RingBufferType>
+double Benchmark(RingBufferType& rb) {
   auto start = std::chrono::system_clock::now();
   std::thread workers[2] = {
       std::thread([&]() {
-        for (uint64_t i = 0; i < bmtCount; ++i) {
+        for (uint64_t i = 0; i < kBmtCount; ++i) {
           int count = 1000;
           while (0 < count) {
             if (rb.enqueue(count)) {
@@ -66,7 +23,7 @@ template <typename RingBufferType> double benchmark(RingBufferType &rb) {
       }),
       std::thread([&]() {
         int result;
-        for (uint64_t i = 0; i < bmtCount; ++i) {
+        for (uint64_t i = 0; i < kBmtCount; ++i) {
           int count = 1000;
           while (0 < count) {
             if (rb.dequeue(&result)) {
@@ -75,17 +32,18 @@ template <typename RingBufferType> double benchmark(RingBufferType &rb) {
           }
         }
       })};
-  for (auto &w : workers) {
+  for (auto& w : workers) {
     w.join();
   }
   auto end = std::chrono::system_clock::now();
-  double duration = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();
-  const int count = bmtCount * (1000 + 1000);
+  double duration =
+      std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();
+  const int count = kBmtCount * (1000 + 1000);
   std::cerr << count << " ops in " << duration << " ns \t";
-  return 1000000.0 * bmtCount * (1000 + 1000) / duration;
+  return 1000000.0 * kBmtCount * (1000 + 1000) / duration;
 }
 
 int main() {
   RingBuffer rb(2 * 1024 * 1024);
-  std::cout << "RingBuffer: " << benchmark(rb) << " ops/ms\n";
-};
+  std::cout << "RingBuffer: " << Benchmark(rb) << " ops/ms\n";
+}

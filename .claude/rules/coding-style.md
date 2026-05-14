@@ -1,6 +1,6 @@
 ---
 name: Algorithm Project Coding Style Guide
-description: C++/Java 알고리즘 프로젝트에서 AI 코드 생성·수정 시 적용할 Domain Clarity, Change Safety, Explicit Intent 중심의 코딩 원칙과 언어별 실천 가이드
+description: C++/Java 알고리즘 프로젝트에서 코드 생성·수정 시 적용할 Domain Clarity, Change Safety, Explicit Intent 중심의 코딩 원칙과 언어별 실천 가이드
 ---
 
 # Algorithm Project Coding Style Guide

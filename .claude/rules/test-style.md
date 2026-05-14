@@ -1,6 +1,6 @@
 ---
 name: Algorithm Project Test Style Guide
-description: C++/Java 알고리즘 프로젝트에서 Classicist TDD 철학을 기반으로 AI 테스트 코드 생성·리뷰 시 적용할 테스트 작성 표준과 품질 기준
+description: C++/Java 알고리즘 프로젝트에서 Classicist TDD 철학을 기반으로 테스트 코드 생성·리뷰 시 적용할 테스트 작성 표준과 품질 기준
 ---
 
 # Algorithm Project Test Style Guide

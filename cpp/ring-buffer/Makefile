@@ -1,17 +1,29 @@
-# 컴파일러 설정
-CXX = g++
-CXXFLAGS = -Wall -O3 -march=native -std=c++17
+CXX      = g++
+CXXFLAGS = -Wall -O2 -std=c++17
 
-# 타겟 이름과 소스 파일
-TARGET = ring_buffer
-SRC = ring_buffer.cpp
+TARGET   = ring_buffer
+SRC      = ring_buffer.cpp
 
-# 기본 빌드 규칙
+# brew install googletest 후 설치되는 경로 (Apple Silicon: /opt/homebrew)
+BREW_PREFIX  ?= /usr/local
+GTEST_INC     = -I$(BREW_PREFIX)/include
+GTEST_LIB     = -L$(BREW_PREFIX)/lib -lgtest -lgtest_main -lpthread
+
+TEST_TARGET = ring_buffer_test
+TEST_SRC    = ring_buffer_test.cpp
+
+.PHONY: all test clean
+
 all: $(TARGET)
 
-$(TARGET): $(SRC)
-	$(CXX) $(CXXFLAGS) -o $(TARGET) $(SRC)
+$(TARGET): $(SRC) ring_buffer.h
+	$(CXX) $(CXXFLAGS) -O3 -march=native -o $@ $(SRC)
 
-# 실행 파일 및 중간 파일 정리
+$(TEST_TARGET): $(TEST_SRC) ring_buffer.h
+	$(CXX) $(CXXFLAGS) $(GTEST_INC) -o $@ $(TEST_SRC) $(GTEST_LIB)
+
+test: $(TEST_TARGET)
+	./$(TEST_TARGET)
+
 clean:
-	rm -f $(TARGET)
+	rm -f $(TARGET) $(TEST_TARGET)
